@@ -2,15 +2,15 @@
 
 namespace Fengxin2017\ETH;
 
-use Illuminate\Support\Manager;
 use FurqanSiddiqui\Ethereum\ERC20\ERC20 as FurqanSiddiquiERC20;
+use Illuminate\Support\Manager;
 
 class Erc20Manager extends Manager
 {
     /**
-     * @return mixed|string
+     * @return string
      */
-    public function getDefaultDriver()
+    public function getDefaultDriver(): string
     {
         return $this->config->get('eth.rpc.default');
     }

@@ -1,0 +1,261 @@
+<?php
+namespace Fengxin2017\Eth\Erc20Tokens;
+
+use Fengxin2017\ETH\Exception\InvalidAccountException;
+use Fengxin2017\ETH\Exception\TransactionException;
+use Fengxin2017\ETH\Facades\Erc20;
+use Fengxin2017\ETH\Facades\Eth;
+use Fengxin2017\ETH\Facades\Geth;
+use FurqanSiddiqui\Ethereum\Accounts\Account;
+use FurqanSiddiqui\Ethereum\ERC20\ERC20_Token;
+use FurqanSiddiqui\Ethereum\ERC20\Exception\ERC20TokenException;
+use FurqanSiddiqui\Ethereum\Exception\ContractsException;
+use FurqanSiddiqui\Ethereum\Exception\RPCException;
+use Illuminate\Support\Traits\ForwardsCalls;
+
+/**
+ * Class Erc20TokenName
+ */
+class Erc20TokenName
+{
+    use ForwardsCalls;
+
+    /**
+     * @var string|null
+     */
+    protected ?string $contractAddress = null;
+
+    /**
+     * @var Account|null
+     */
+    protected ?Account $contractAccount = null;
+
+    /**
+     * @var ERC20_Token|null
+     */
+    protected ?ERC20_Token $token = null;
+
+    /**
+     * @var Account|null
+     */
+    protected ?Account $from = null;
+
+    /**
+     * @var Account|null
+     */
+    protected ?Account $to = null;
+
+    /**
+     * @var string|null
+     */
+    protected ?string $amount = null;
+
+    /**
+     * @var string|null
+     */
+    protected ?string $transactionPassword = null;
+
+    /**
+     * @var string
+     */
+    protected string $withEth = '0';
+
+    /**
+     * Erc20TokenName constructor.
+     */
+    public function __construct()
+    {
+        $this->contractAddress = config(sprintf('eth.tokens.%s', 'Erc20TokenName'));
+        $this->contractAccount = Eth::getAccount($this->contractAddress);
+        $this->token = Erc20::token($this->contractAddress);
+    }
+
+    /**
+     * @param $account
+     * @param bool $scaled
+     * @return string
+     * @throws ContractsException
+     * @throws ERC20TokenException
+     * @throws RPCException
+     */
+    public function balanceOf($account, bool $scaled = true): string
+    {
+        if (is_string($account)) {
+            $account = Eth::getAccount($account);
+        }
+
+        return $this->token->balanceOf($account, $scaled);
+    }
+
+    /**
+     * @param $from
+     * @return $this
+     * @throws InvalidAccountException
+     */
+    public function from($from): self
+    {
+        if (is_string($from)) {
+            $this->from = Eth::getAccount($from);
+            return $this;
+        }
+
+        if ($from instanceof Account) {
+            $this->from = $from;
+            return $this;
+        }
+
+        throw new InvalidAccountException(sprintf('{from} should instanceof %s or be string', Account::class));
+    }
+
+    /**
+     * @return Account|null
+     */
+    public function getFrom(): ?Account
+    {
+        return $this->from;
+    }
+
+    /**
+     * @param $to
+     * @return $this
+     * @throws InvalidAccountException
+     */
+    public function to($to): self
+    {
+        if (is_string($to)) {
+            $this->to = Eth::getAccount($to);
+            return $this;
+        }
+
+        if ($to instanceof Account) {
+            $this->to = $to;
+            return $this;
+        }
+
+        throw new InvalidAccountException(sprintf('{to} should instanceof %s or be string', Account::class));
+    }
+
+    /**
+     * @return Account|null
+     */
+    public function getto(): ?Account
+    {
+        return $this->to;
+    }
+
+    /**
+     * @param string $amount
+     * @return $this
+     */
+    public function amount(string $amount): self
+    {
+        $this->amount = $amount;
+        return $this;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getAmount(): ?string
+    {
+        return $this->amount;
+    }
+
+    /**
+     * @param string $password
+     * @return $this
+     */
+    public function password(string $password): self
+    {
+        $this->transactionPassword = $password;
+        return $this;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getTransactionPassword(): ?string
+    {
+        return $this->transactionPassword;
+    }
+
+    /**
+     * @param string $withEth
+     * @return $this
+     */
+    public function setWithEth(string $withEth): self
+    {
+        $this->withEth = $withEth;
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getWithEth(): ?string
+    {
+        return $this->withEth;
+    }
+
+    /**
+     * @throws ContractsException
+     * @throws ERC20TokenException
+     * @throws RPCException
+     * @throws TransactionException
+     */
+    public function send()
+    {
+        if (true === $this->transactionValidateFailed()) {
+            throw new TransactionException('from|to|amount|password can not be NULL');
+        }
+
+        Geth::call('personal_sendTransaction', [
+            $this->buildTransactionParams(), $this->transactionPassword
+        ]);
+    }
+
+    /**
+     * @return bool
+     */
+    protected function transactionValidateFailed(): bool
+    {
+        return is_null($this->contractAccount) || is_null($this->from) || is_null($this->to) || is_null($this->amount) || is_null($this->transactionPassword);
+    }
+
+    /**
+     * @return array
+     * @throws ERC20TokenException
+     * @throws ContractsException
+     * @throws RPCException
+     */
+    protected function buildTransactionParams()
+    {
+        return [
+            'from' => $this->from->getAddress(),
+            'to' => $this->contractAccount->getAddress(),
+            'value' => $this->getWithEth(),
+            'data' => $this->token->encodedTransferData($this->to, $this->amount)
+        ];
+    }
+
+    /**
+     * @param $method
+     * @param $parameters
+     * @return mixed
+     */
+    public function __call(string $method, array $parameters)
+    {
+        return $this->forwardCallTo($this->token, $method, $parameters);
+    }
+
+    /**
+     * @param string $method
+     * @param array $parameters
+     * @return mixed
+     */
+    public static function __callStatic(string $method, array $parameters)
+    {
+        return (new static)->$method(...$parameters);
+    }
+}
+

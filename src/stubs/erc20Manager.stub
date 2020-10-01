@@ -1,0 +1,49 @@
+<?php
+
+use Fengxin2017\Eth\Erc20Tokens\Erc20TokenName as Token;
+use Illuminate\Support\Traits\ForwardsCalls;
+use FurqanSiddiqui\Ethereum\Accounts\Account;
+use FurqanSiddiqui\Ethereum\ERC20\ERC20;
+use FurqanSiddiqui\Ethereum\RPC\AbstractRPCClient;
+use FurqanSiddiqui\Ethereum\Contracts\ABI;
+
+/**
+ * @method static array array()
+ * @method static string name()
+ * @method static string symbol()
+ * @method static string balanceOf($account, bool $scaled = true)
+ * @method static int decimals()
+ * @method static string totalSupply(bool $scaled = true)
+ * @method static string encodedTransferData(Account $payee, string $amount)
+ * @method static ERC20 useRPCClient(AbstractRPCClient $rpcClient)
+ * @method static ABI abi()
+ * @method static ?AbstractRPCClient rpcClient()
+ * @method static array call(string $func, ?array $args = null, string $block = "latest")
+ *
+ * Class Erc20TokenName
+ */
+class Erc20TokenName
+{
+    use ForwardsCalls;
+
+    /**
+     * @param $method
+     * @param $parameters
+     * @return mixed
+     */
+    public function __call(string $method, array $parameters)
+    {
+        return $this->forwardCallTo(app(Token::class), $method, $parameters);
+    }
+
+    /**
+     * @param string $method
+     * @param array $parameters
+     * @return mixed
+     */
+    public static function __callStatic(string $method, array $parameters)
+    {
+        return (new static)->$method(...$parameters);
+    }
+}
+
