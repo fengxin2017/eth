@@ -1,0 +1,17 @@
+<?php
+
+use Illuminate\Support\Facades\Facade;
+use Fengxin2017\ETH\Facades\Erc20;
+
+class Erc20TokenName extends Facade
+{
+    /**
+     * Get the registered name of the component.
+     *
+     * @return string
+     */
+    protected static function getFacadeAccessor()
+    {
+        return Erc20::token(config(sprintf('eth.tokens.%s','Erc20TokenName')));
+    }
+}

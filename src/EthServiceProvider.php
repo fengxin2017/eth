@@ -17,6 +17,7 @@ class EthServiceProvider extends ServiceProvider
         $this->registerErc20();
         $this->registerGeth();
         $this->registerInfura();
+        $this->prependToLoaderStack();
     }
 
     protected function registerEth()
@@ -55,6 +56,53 @@ class EthServiceProvider extends ServiceProvider
                 'port' => config('eth.geth.port')
             ]);
         });
+    }
+
+    protected function prependToLoaderStack()
+    {
+        spl_autoload_register([$this, 'loadErc20TokenFacacde'], true, true);
+    }
+
+    /**
+     * @param string $token
+     * @return bool|null
+     */
+    public function loadErc20TokenFacacde(string $token)
+    {
+        if (in_array($token, array_keys(config('eth.tokens')))) {
+            require $this->ensureFacadeExists($token);
+
+            return true;
+        }
+
+        return null;
+    }
+
+    /**
+     * @param string $token
+     * @return string
+     */
+    protected function ensureFacadeExists(string $token): string
+    {
+        if (is_file($path = storage_path('framework/cache/facade-' . sha1($token) . '.php'))) {
+            return $path;
+        }
+
+        file_put_contents($path, $this->formatFacadeStub(
+            $token, file_get_contents(__DIR__ . '/../stubs/erc20.stub')
+        ));
+
+        return $path;
+    }
+
+    /**
+     * @param string $token
+     * @param string $stub
+     * @return string
+     */
+    protected function formatFacadeStub(string $token, string $stub): string
+    {
+        return str_replace('Erc20TokenName', class_basename($token), $stub);
     }
 
     public function boot()
