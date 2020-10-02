@@ -47,6 +47,12 @@ Geth::eth_blockNumber();
 Infura::eth_getBalance(ETHADDRESS);
 Infura::eth_blockNumber();
 
+// http://cw.hubwiz.com/card/c/ethereum-json-rpc-api/1/3/17/
+// http://cw.hubwiz.com/card/c/geth-rpc-api/1/4/6/
+Geth::call(METHOD_NAME,ARRAYPARAMS)
+
+//https://infura.io/docs/ethereum/json-rpc
+Infura::call(METHOD_NAME,ARRAYPARAMS)
 `````
 
 `````php
