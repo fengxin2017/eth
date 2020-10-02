@@ -58,7 +58,7 @@ class Erc20TokenName
     /**
      * @var string
      */
-    protected string $withEth = '0';
+    protected string $withEth = '0x0';
 
     /**
      * Erc20TokenName constructor.
