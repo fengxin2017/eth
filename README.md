@@ -56,7 +56,6 @@ Infura::call(METHOD_NAME,ARRAYPARAMS)
 `````
 
 `````php
-
 // transfer erc20token only support geth rpcclient
 
 use FurqanSiddiqui\Ethereum\Accounts\Account;
@@ -73,13 +72,14 @@ YFII::balanceOf(Account|ETHADDRESS);
 
 YFII::from(Account|ETHADDRESS)
     ->to(Account|ETHADDRESS)
-    ->amount(amount) // wei
+    ->amount(amount) 
     ->password(password)
     ->send();
+.....
 
-// more...add token to config/eth.php
 
-// NATIVE
+# OR
+
 $usdt = Erc20::token(UsdtContractAddress);
 $data = $usdt->encodedTransferData($to, $amount);
 $params = [
