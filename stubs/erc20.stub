@@ -198,6 +198,7 @@ class Erc20TokenName
     }
 
     /**
+     * @return string
      * @throws ContractsException
      * @throws ERC20TokenException
      * @throws RPCException
@@ -209,7 +210,7 @@ class Erc20TokenName
             throw new TransactionException('from|to|amount|password can not be NULL');
         }
 
-        Geth::call('personal_sendTransaction', [
+        return Geth::call('personal_sendTransaction', [
             $this->buildTransactionParams(), $this->transactionPassword
         ]);
     }

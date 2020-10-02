@@ -11,9 +11,13 @@
     ],
     "minimum-stability": "dev",
     "require": {
+        "ext-bcmath": "*",
         "furqansiddiqui/erc20-php": "^0.2.0"
     },
     "autoload": {
+        "files": [
+            "src/helpers.php"
+        ],
         "psr-4": {
             "Fengxin2017\\ETH\\": "src"
         }
