@@ -1,4 +1,4 @@
-### description
+### Description
 Ethereum API For Laravel
 
 ### Prerequisites
