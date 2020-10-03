@@ -22,7 +22,6 @@ class EthServiceProvider extends ServiceProvider
         $this->registerErc20();
         $this->registerGeth();
         $this->registerInfura();
-        $this->prependToLoaderStack();
     }
 
     protected function registerEth()
@@ -124,5 +123,7 @@ class EthServiceProvider extends ServiceProvider
         }
 
         $this->mergeConfigFrom(__DIR__ . '/../config/eth.php', 'eth');
+
+        $this->prependToLoaderStack();
     }
 }
