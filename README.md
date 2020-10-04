@@ -60,6 +60,7 @@ Infura::call(METHOD_NAME,ARRAYPARAMS)
 
 use FurqanSiddiqui\Ethereum\Accounts\Account;
 use Fengxin2017\ETH\Facades\Erc20;
+use Fengxin2017\ETH\Facades\Geth;
 
 Usdt::name();
 Usdt::totalSupply();
@@ -70,11 +71,15 @@ YFI::totalSupply();
 
 YFII::balanceOf(Account|ETHADDRESS);
 
-YFII::from(Account|ETHADDRESS)
+$recipt = YFII::from(Account|ETHADDRESS)
     ->to(Account|ETHADDRESS)
     ->amount(amount) 
     ->password(password)
     ->send();
+
+// Pending will return null 
+$transactionInfo = Geth::call('eth_getTransactionReceipt',[$recipt]);
+
 .....
 
 
